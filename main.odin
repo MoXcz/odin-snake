@@ -27,6 +27,12 @@ main :: proc() {
 			}
 		}
 
+		pos := []screenPos{screenPos{3, 3}, screenPos{3, 4}}
+		for p, _ in pos {
+			rect := gridToScreen(p)
+			rl.DrawRectangleRec(rect, rl.GREEN)
+		}
+
 		rl.EndDrawing()
 	}
 
@@ -44,6 +50,7 @@ drawGridPos :: proc(sPos: screenPos) {
 }
 
 getScreenPosition :: proc(gPos: screenPos) -> screenPos {
+	// FIX: avoid re-computing this everytime function it's called
 	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
 	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
 
@@ -51,4 +58,15 @@ getScreenPosition :: proc(gPos: screenPos) -> screenPos {
 	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
 
 	return screenPos{startPosX, startPosY}
+}
+
+gridToScreen :: proc(gPos: screenPos) -> rl.Rectangle {
+	// FIX: avoid re-computing this everytime function it's called
+	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
+	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
+
+	startPosX := (gPos.x * SQUARE_SIZE) + i32(gridOffsetX)
+	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
+
+	return rl.Rectangle{f32(startPosX), f32(startPosY), SQUARE_SIZE, SQUARE_SIZE}
 }
