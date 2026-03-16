@@ -5,21 +5,21 @@ import rl "vendor:raylib"
 // 12x12 grid; 50px
 // 50 * 12 = 600
 
+GRID_SIZE :: 600
+SQUARE_SIZE :: 50
+TOTAL_SIZE :: GRID_SIZE / SQUARE_SIZE
+
 main :: proc() {
 	rl.InitWindow(1280, 720, "Odin Monkey")
 	rl.SetExitKey(rl.KeyboardKey.Q)
 
 	rl.SetTargetFPS(60)
 
-	gridSize := 600
-	squareSize := 50
-	totalSize := gridSize / squareSize
-
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
-		for i in 0 ..< totalSize {
-			for j in 0 ..< totalSize {
+		for i in 0 ..< TOTAL_SIZE {
+			for j in 0 ..< TOTAL_SIZE {
 				drawGridPos(gridPos{i32(i), i32(j)})
 			}
 		}
@@ -52,10 +52,10 @@ drawGridPos :: proc(gPos: gridPos) {
 }
 
 getScreenPosition :: proc(gPos: gridPos) -> screenPos {
-	startPosX := gPos.x * 50
-	endPosX := startPosX + 50
-	startPosY := gPos.y * 50
-	endPosY := startPosY + 50
+	startPosX := gPos.x * SQUARE_SIZE
+	endPosX := startPosX + SQUARE_SIZE
+	startPosY := gPos.y * SQUARE_SIZE
+	endPosY := startPosY + SQUARE_SIZE
 
 	return screenPos{startPosX, startPosY, endPosX, endPosY}
 }
