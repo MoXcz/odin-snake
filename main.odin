@@ -37,6 +37,22 @@ main :: proc() {
 			}
 		}
 
+		// left
+		if rl.IsKeyPressed(.H) {
+			direction = gridPos{-1, 0}
+		}
+		// down
+		if rl.IsKeyPressed(.J) {
+			direction = gridPos{0, 1}
+		}
+		// up
+		if rl.IsKeyPressed(.K) {
+			direction = gridPos{0, -1}
+		}
+		// right
+		if rl.IsKeyPressed(.L) {
+			direction = gridPos{1, 0}
+		}
 
 		moveTimer += rl.GetFrameTime()
 		if moveTimer >= moveInterval {
@@ -95,6 +111,7 @@ drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
 		rl.DrawRectangleRec(rect, rl.GREEN)
 	}
 }
+
 moveSnake :: proc(snake: ^[dynamic]gridPos, direction: gridPos) {
 	head := snake[0]
 	newHead := gridPos {
