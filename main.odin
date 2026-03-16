@@ -18,8 +18,8 @@ main :: proc() {
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
-		for i in 0 ..= totalSize {
-			for j in 0 ..= totalSize {
+		for i in 0 ..< totalSize {
+			for j in 0 ..< totalSize {
 				drawGridPos(gridPos{i32(i), i32(j)})
 			}
 		}
