@@ -12,13 +12,34 @@ TOTAL_SIZE :: GRID_SIZE / SQUARE_SIZE
 WIN_WIDTH :: 1280
 WIN_HEIGHT :: 720
 
+Direction :: enum {
+	LEFT,
+	UP,
+	RIGHT,
+	DOWN,
+}
+
+getDirectionPos :: proc(direction: Direction) -> gridPos {
+	switch direction {
+	case .LEFT:
+		return {-1, 0}
+	case .UP:
+		return {0, -1}
+	case .RIGHT:
+		return {1, 0}
+	case .DOWN:
+		return {0, 1}
+	}
+	return {1, 0}
+}
+
 main :: proc() {
 	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Monkey")
 	rl.SetExitKey(.Q)
 
 	rl.SetTargetFPS(60)
 
-	direction := gridPos{1, 0}
+	direction := Direction.LEFT
 	moveInterval: f32 = 0.1
 	moveTimer: f32
 
@@ -38,25 +59,25 @@ main :: proc() {
 		}
 
 		// left
-		if rl.IsKeyPressed(.H) {
-			direction = gridPos{-1, 0}
+		if rl.IsKeyPressed(.H) && direction != .RIGHT {
+			direction = .LEFT
 		}
 		// down
-		if rl.IsKeyPressed(.J) {
-			direction = gridPos{0, 1}
+		if rl.IsKeyPressed(.J) && direction != .UP {
+			direction = .DOWN
 		}
 		// up
-		if rl.IsKeyPressed(.K) {
-			direction = gridPos{0, -1}
+		if rl.IsKeyPressed(.K) && direction != .DOWN {
+			direction = .UP
 		}
 		// right
-		if rl.IsKeyPressed(.L) {
-			direction = gridPos{1, 0}
+		if rl.IsKeyPressed(.L) && direction != .LEFT {
+			direction = .RIGHT
 		}
 
 		moveTimer += rl.GetFrameTime()
 		if moveTimer >= moveInterval {
-			moveSnake(&snake, direction)
+			moveSnake(&snake, getDirectionPos(direction))
 			drawSnakePos(snake)
 			moveTimer = 0
 		} else {
