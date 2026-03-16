@@ -12,6 +12,9 @@ TOTAL_SIZE :: GRID_SIZE / SQUARE_SIZE
 WIN_WIDTH :: 1280
 WIN_HEIGHT :: 720
 
+GRID_OFFSET_X :: (WIN_WIDTH - GRID_SIZE) / 2
+GRID_OFFSET_Y :: (WIN_HEIGHT - GRID_SIZE) / 2
+
 Direction :: enum {
 	LEFT,
 	UP,
@@ -105,25 +108,20 @@ drawGridPos :: proc(sPos: gridPos) {
 }
 
 getScreenPosition :: proc(gPos: gridPos) -> gridPos {
-	// FIX: avoid re-computing this everytime function it's called
-	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
-	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
-
-	startPosX := (gPos.x * SQUARE_SIZE) + i32(gridOffsetX)
-	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
-
-	return gridPos{startPosX, startPosY}
+	return gridPos {
+		x = (gPos.x * SQUARE_SIZE) + GRID_OFFSET_X,
+		y = (gPos.y * SQUARE_SIZE) + GRID_OFFSET_Y,
+	}
 }
 
 gridToScreen :: proc(gPos: gridPos) -> rl.Rectangle {
-	// FIX: avoid re-computing this everytime function it's called
-	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
-	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
-
-	startPosX := (gPos.x * SQUARE_SIZE) + i32(gridOffsetX)
-	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
-
-	return rl.Rectangle{f32(startPosX), f32(startPosY), SQUARE_SIZE, SQUARE_SIZE}
+	gPos := getScreenPosition(gPos)
+	return rl.Rectangle {
+		x = f32(gPos.x),
+		y = f32(gPos.y),
+		width = SQUARE_SIZE,
+		height = SQUARE_SIZE,
+	}
 }
 
 drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
