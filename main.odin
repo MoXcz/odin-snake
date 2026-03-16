@@ -9,8 +9,11 @@ GRID_SIZE :: 600
 SQUARE_SIZE :: 50
 TOTAL_SIZE :: GRID_SIZE / SQUARE_SIZE
 
+WIN_WIDTH :: 1280
+WIN_HEIGHT :: 720
+
 main :: proc() {
-	rl.InitWindow(1280, 720, "Odin Monkey")
+	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Monkey")
 	rl.SetExitKey(rl.KeyboardKey.Q)
 
 	rl.SetTargetFPS(60)
@@ -48,10 +51,14 @@ drawGridPos :: proc(gPos: gridPos) {
 }
 
 getScreenPosition :: proc(gPos: gridPos) -> screenPos {
-	startPosX := gPos.x * SQUARE_SIZE
-	endPosX := startPosX + SQUARE_SIZE
-	startPosY := gPos.y * SQUARE_SIZE
-	endPosY := startPosY + SQUARE_SIZE
+	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
+	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
+
+	startPosX := (gPos.x * SQUARE_SIZE) + i32(gridOffsetX)
+	endPosX := (startPosX + SQUARE_SIZE)
+
+	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
+	endPosY := (startPosY + SQUARE_SIZE)
 
 	return screenPos{startPosX, startPosY, endPosX, endPosY}
 }
