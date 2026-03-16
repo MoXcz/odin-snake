@@ -106,8 +106,12 @@ gridToScreen :: proc(gPos: gridPos) -> rl.Rectangle {
 }
 
 drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
-	for gPos, _ in gPositions {
+	for gPos, i in gPositions {
 		rect := gridToScreen(gPos)
+		if i == 0 {
+			rl.DrawRectangleRec(rect, rl.RED)
+			continue
+		}
 		rl.DrawRectangleRec(rect, rl.GREEN)
 	}
 }
