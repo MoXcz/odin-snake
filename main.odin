@@ -44,11 +44,7 @@ gridPos :: struct {
 
 drawGridPos :: proc(gPos: gridPos) {
 	scrPos := getScreenPosition(gPos)
-
-	rl.DrawLine(scrPos.startPosX, scrPos.startPosY, scrPos.endPosX, scrPos.startPosY, rl.BLACK)
-	rl.DrawLine(scrPos.startPosX, scrPos.startPosY, scrPos.startPosX, scrPos.endPosY, rl.BLACK)
-	rl.DrawLine(scrPos.startPosX, scrPos.endPosY, scrPos.endPosX, scrPos.endPosY, rl.BLACK)
-	rl.DrawLine(scrPos.endPosX, scrPos.startPosY, scrPos.endPosX, scrPos.endPosY, rl.BLACK)
+	rl.DrawRectangleLines(scrPos.startPosX, scrPos.startPosY, SQUARE_SIZE, SQUARE_SIZE, rl.BLACK)
 }
 
 getScreenPosition :: proc(gPos: gridPos) -> screenPos {
