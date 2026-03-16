@@ -23,7 +23,7 @@ main :: proc() {
 		rl.ClearBackground(rl.WHITE)
 		for i in 0 ..< TOTAL_SIZE {
 			for j in 0 ..< TOTAL_SIZE {
-				drawGridPos(gridPos{i32(i), i32(j)})
+				drawGridPos(screenPos{i32(i), i32(j)})
 			}
 		}
 
@@ -34,31 +34,21 @@ main :: proc() {
 }
 
 screenPos :: struct {
-	startPosX: i32,
-	startPosY: i32,
-	endPosX:   i32,
-	endPosY:   i32,
-}
-
-gridPos :: struct {
 	x: i32,
 	y: i32,
 }
 
-drawGridPos :: proc(gPos: gridPos) {
-	scrPos := getScreenPosition(gPos)
-	rl.DrawRectangleLines(scrPos.startPosX, scrPos.startPosY, SQUARE_SIZE, SQUARE_SIZE, rl.BLACK)
+drawGridPos :: proc(sPos: screenPos) {
+	scrPos := getScreenPosition(sPos)
+	rl.DrawRectangleLines(scrPos.x, scrPos.y, SQUARE_SIZE, SQUARE_SIZE, rl.BLACK)
 }
 
-getScreenPosition :: proc(gPos: gridPos) -> screenPos {
+getScreenPosition :: proc(gPos: screenPos) -> screenPos {
 	gridOffsetX := (WIN_WIDTH - GRID_SIZE) / 2
 	gridOffsetY := (WIN_HEIGHT - GRID_SIZE) / 2
 
 	startPosX := (gPos.x * SQUARE_SIZE) + i32(gridOffsetX)
-	endPosX := (startPosX + SQUARE_SIZE)
-
 	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
-	endPosY := (startPosY + SQUARE_SIZE)
 
-	return screenPos{startPosX, startPosY, endPosX, endPosY}
+	return screenPos{startPosX, startPosY}
 }
