@@ -27,11 +27,11 @@ main :: proc() {
 			}
 		}
 
-		pos := []gridPos{gridPos{3, 3}, gridPos{3, 4}}
-		for p, _ in pos {
-			rect := gridToScreen(p)
-			rl.DrawRectangleRec(rect, rl.GREEN)
-		}
+		snake := make([dynamic]gridPos, 0, 20)
+		defer delete(snake)
+		append(&snake, gridPos{3, 4})
+		append(&snake, gridPos{3, 5})
+		drawSnakePos(snake)
 
 		rl.EndDrawing()
 	}
@@ -39,6 +39,9 @@ main :: proc() {
 	rl.CloseWindow()
 }
 
+// gridPos represents the top-left position in a grid:
+// P .
+// . .
 gridPos :: struct {
 	x: i32,
 	y: i32,
@@ -69,4 +72,11 @@ gridToScreen :: proc(gPos: gridPos) -> rl.Rectangle {
 	startPosY := (gPos.y * SQUARE_SIZE) + i32(gridOffsetY)
 
 	return rl.Rectangle{f32(startPosX), f32(startPosY), SQUARE_SIZE, SQUARE_SIZE}
+}
+
+drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
+	for gPos, _ in gPositions {
+		rect := gridToScreen(gPos)
+		rl.DrawRectangleRec(rect, rl.GREEN)
+	}
 }
