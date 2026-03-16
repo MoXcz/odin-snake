@@ -14,9 +14,19 @@ WIN_HEIGHT :: 720
 
 main :: proc() {
 	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Monkey")
-	rl.SetExitKey(rl.KeyboardKey.Q)
+	rl.SetExitKey(.Q)
 
 	rl.SetTargetFPS(60)
+
+	direction := gridPos{1, 0}
+	moveInterval: f32 = 0.1
+	moveTimer: f32
+
+	snake := make([dynamic]gridPos, 0, 20)
+	defer delete(snake)
+	append(&snake, gridPos{3, 4})
+	append(&snake, gridPos{2, 4})
+	append(&snake, gridPos{1, 4})
 
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
@@ -27,11 +37,16 @@ main :: proc() {
 			}
 		}
 
-		snake := make([dynamic]gridPos, 0, 20)
-		defer delete(snake)
-		append(&snake, gridPos{3, 4})
-		append(&snake, gridPos{3, 5})
-		drawSnakePos(snake)
+
+		moveTimer += rl.GetFrameTime()
+		if moveTimer >= moveInterval {
+			moveSnake(&snake, direction)
+			drawSnakePos(snake)
+			moveTimer = 0
+		} else {
+			drawSnakePos(snake)
+		}
+
 
 		rl.EndDrawing()
 	}
@@ -79,4 +94,16 @@ drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
 		rect := gridToScreen(gPos)
 		rl.DrawRectangleRec(rect, rl.GREEN)
 	}
+}
+moveSnake :: proc(snake: ^[dynamic]gridPos, direction: gridPos) {
+	head := snake[0]
+	newHead := gridPos {
+		x = head.x + direction.x,
+		y = head.y + direction.y,
+	}
+
+	for i := len(snake) - 1; i > 0; i -= 1 {
+		snake[i] = snake[i - 1]
+	}
+	snake[0] = newHead
 }
