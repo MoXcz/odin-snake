@@ -57,31 +57,6 @@ main :: proc() {
 	start(&snake)
 
 	for (!rl.WindowShouldClose()) {
-		rl.BeginDrawing()
-		rl.ClearBackground(rl.WHITE)
-
-		camera := rl.Camera2D {
-			zoom = f32(WIN_HEIGHT) / GRID_SIZE,
-		}
-
-		if move_timer >= move_interval {
-			move_snake(&snake, get_direction_pos(direction))
-
-			head := snake[0]
-			if head.pos.x < 0 ||
-			   head.pos.y < 0 ||
-			   head.pos.x >= NUM_CELLS ||
-			   head.pos.y >= NUM_CELLS {
-				game_over = true
-				direction = .LEFT
-			}
-			move_timer = 0
-		}
-
-		rl.BeginMode2D(camera)
-
-		rl.DrawRectangleLines(0, 0, GRID_SIZE, GRID_SIZE, rl.BLACK)
-
 		// left
 		if rl.IsKeyPressed(.H) && direction != .RIGHT {
 			direction = .LEFT
@@ -106,7 +81,34 @@ main :: proc() {
 			move_timer += rl.GetFrameTime()
 		}
 
+		if move_timer >= move_interval {
+			move_snake(&snake, get_direction_pos(direction))
+
+			head := snake[0]
+			if head.pos.x < 0 ||
+			   head.pos.y < 0 ||
+			   head.pos.x >= NUM_CELLS ||
+			   head.pos.y >= NUM_CELLS {
+				game_over = true
+				direction = .LEFT
+			}
+			move_timer = 0
+		}
+
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.WHITE)
+
+		camera := rl.Camera2D {
+			zoom = f32(WIN_HEIGHT) / GRID_SIZE,
+		}
+		rl.BeginMode2D(camera)
+
+		rl.DrawRectangleLines(0, 0, GRID_SIZE, GRID_SIZE, rl.BLACK)
 		draw_snake_pos(snake)
+
+		if game_over {
+			rl.DrawText("Game Over", GRID_SIZE / 2, GRID_SIZE / 2, 32, rl.RED)
+		}
 
 		rl.EndMode2D()
 		rl.EndDrawing()
