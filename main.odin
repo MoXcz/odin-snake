@@ -57,19 +57,15 @@ main :: proc() {
 	start(&snake)
 
 	for (!rl.WindowShouldClose()) {
-		// left
 		if rl.IsKeyPressed(.H) && direction != .RIGHT {
 			direction = .LEFT
 		}
-		// down
 		if rl.IsKeyPressed(.J) && direction != .UP {
 			direction = .DOWN
 		}
-		// up
 		if rl.IsKeyPressed(.K) && direction != .DOWN {
 			direction = .UP
 		}
-		// right
 		if rl.IsKeyPressed(.L) && direction != .LEFT {
 			direction = .RIGHT
 		}
