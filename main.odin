@@ -2,13 +2,9 @@ package main
 
 import rl "vendor:raylib"
 
-// 12x12 grid; 50px
-// 50 * 12 = 600
-
 NUM_CELLS :: 20
 CELL_SIZE :: 25
 GRID_SIZE :: NUM_CELLS * CELL_SIZE
-TOTAL_SIZE :: GRID_SIZE / CELL_SIZE
 
 WIN_WIDTH :: 1000
 WIN_HEIGHT :: 1000
