@@ -6,8 +6,8 @@ import rl "vendor:raylib"
 // 50 * 12 = 600
 
 GRID_SIZE :: 600
-SQUARE_SIZE :: 50
-TOTAL_SIZE :: GRID_SIZE / SQUARE_SIZE
+CELL_SIZE :: 50
+TOTAL_SIZE :: GRID_SIZE / CELL_SIZE
 
 WIN_WIDTH :: 1280
 WIN_HEIGHT :: 720
@@ -22,7 +22,7 @@ Direction :: enum {
 	DOWN,
 }
 
-getDirectionPos :: proc(direction: Direction) -> gridPos {
+get_direction_pos :: proc(direction: Direction) -> Snake {
 	switch direction {
 	case .LEFT:
 		return {-1, 0}
@@ -46,18 +46,18 @@ main :: proc() {
 	moveInterval: f32 = 0.1
 	moveTimer: f32
 
-	snake := make([dynamic]gridPos, 0, 20)
+	snake := make([dynamic]Snake, 0, 20)
 	defer delete(snake)
-	append(&snake, gridPos{3, 4})
-	append(&snake, gridPos{2, 4})
-	append(&snake, gridPos{1, 4})
+	append(&snake, Snake{3, 4})
+	append(&snake, Snake{2, 4})
+	append(&snake, Snake{1, 4})
 
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
 		for i in 0 ..< TOTAL_SIZE {
 			for j in 0 ..< TOTAL_SIZE {
-				drawGridPos(gridPos{i32(i), i32(j)})
+				draw_grid_pos(Snake{i32(i), i32(j)})
 			}
 		}
 
@@ -80,11 +80,11 @@ main :: proc() {
 
 		moveTimer += rl.GetFrameTime()
 		if moveTimer >= moveInterval {
-			moveSnake(&snake, getDirectionPos(direction))
-			drawSnakePos(snake)
+			move_snake(&snake, get_direction_pos(direction))
+			draw_snake_pos(snake)
 			moveTimer = 0
 		} else {
-			drawSnakePos(snake)
+			draw_snake_pos(snake)
 		}
 
 
@@ -97,36 +97,31 @@ main :: proc() {
 // gridPos represents the top-left position in a grid:
 // P .
 // . .
-gridPos :: struct {
+Snake :: struct {
 	x: i32,
 	y: i32,
 }
 
-drawGridPos :: proc(sPos: gridPos) {
-	scrPos := getScreenPosition(sPos)
-	rl.DrawRectangleLines(scrPos.x, scrPos.y, SQUARE_SIZE, SQUARE_SIZE, rl.BLACK)
+draw_grid_pos :: proc(sPos: Snake) {
+	scrPos := get_screen_pos(sPos)
+	rl.DrawRectangleLines(scrPos.x, scrPos.y, CELL_SIZE, CELL_SIZE, rl.BLACK)
 }
 
-getScreenPosition :: proc(gPos: gridPos) -> gridPos {
-	return gridPos {
-		x = (gPos.x * SQUARE_SIZE) + GRID_OFFSET_X,
-		y = (gPos.y * SQUARE_SIZE) + GRID_OFFSET_Y,
+get_screen_pos :: proc(gPos: Snake) -> Snake {
+	return Snake {
+		x = (gPos.x * CELL_SIZE) + GRID_OFFSET_X,
+		y = (gPos.y * CELL_SIZE) + GRID_OFFSET_Y,
 	}
 }
 
-gridToScreen :: proc(gPos: gridPos) -> rl.Rectangle {
-	gPos := getScreenPosition(gPos)
-	return rl.Rectangle {
-		x = f32(gPos.x),
-		y = f32(gPos.y),
-		width = SQUARE_SIZE,
-		height = SQUARE_SIZE,
-	}
+grid_to_screen :: proc(gPos: Snake) -> rl.Rectangle {
+	gPos := get_screen_pos(gPos)
+	return rl.Rectangle{x = f32(gPos.x), y = f32(gPos.y), width = CELL_SIZE, height = CELL_SIZE}
 }
 
-drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
+draw_snake_pos :: proc(gPositions: [dynamic]Snake) {
 	for gPos, i in gPositions {
-		rect := gridToScreen(gPos)
+		rect := grid_to_screen(gPos)
 		if i == 0 {
 			rl.DrawRectangleRec(rect, rl.RED)
 			continue
@@ -135,9 +130,9 @@ drawSnakePos :: proc(gPositions: [dynamic]gridPos) {
 	}
 }
 
-moveSnake :: proc(snake: ^[dynamic]gridPos, direction: gridPos) {
+move_snake :: proc(snake: ^[dynamic]Snake, direction: Snake) {
 	head := snake[0]
-	newHead := gridPos {
+	newHead := Snake {
 		x = head.x + direction.x,
 		y = head.y + direction.y,
 	}
