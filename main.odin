@@ -22,7 +22,7 @@ Direction :: enum {
 	DOWN,
 }
 
-get_direction_pos :: proc(direction: Direction) -> Snake {
+get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 	switch direction {
 	case .LEFT:
 		return {-1, 0}
@@ -48,18 +48,20 @@ main :: proc() {
 
 	snake := make([dynamic]Snake, 0, 20)
 	defer delete(snake)
-	append(&snake, Snake{3, 4})
-	append(&snake, Snake{2, 4})
-	append(&snake, Snake{1, 4})
+	append(&snake, Snake{pos = {3, 4}})
+	append(&snake, Snake{pos = {2, 4}})
+	append(&snake, Snake{pos = {1, 4}})
 
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
-		for i in 0 ..< TOTAL_SIZE {
-			for j in 0 ..< TOTAL_SIZE {
-				draw_grid_pos(Snake{i32(i), i32(j)})
-			}
+		rect := rl.Rectangle {
+			x      = f32(GRID_OFFSET_X),
+			y      = f32(GRID_OFFSET_Y),
+			width  = GRID_SIZE,
+			height = GRID_SIZE,
 		}
+		rl.DrawRectangleLines(GRID_OFFSET_X, GRID_OFFSET_Y, GRID_SIZE, GRID_SIZE, rl.BLACK)
 
 		// left
 		if rl.IsKeyPressed(.H) && direction != .RIGHT {
@@ -98,30 +100,21 @@ main :: proc() {
 // P .
 // . .
 Snake :: struct {
-	x: i32,
-	y: i32,
+	pos: [2]i32,
 }
 
-draw_grid_pos :: proc(sPos: Snake) {
-	scrPos := get_screen_pos(sPos)
-	rl.DrawRectangleLines(scrPos.x, scrPos.y, CELL_SIZE, CELL_SIZE, rl.BLACK)
-}
-
-get_screen_pos :: proc(gPos: Snake) -> Snake {
-	return Snake {
-		x = (gPos.x * CELL_SIZE) + GRID_OFFSET_X,
-		y = (gPos.y * CELL_SIZE) + GRID_OFFSET_Y,
+get_snake_rect :: proc(snake: Snake) -> rl.Rectangle {
+	return rl.Rectangle {
+		x = f32((snake.pos.x * CELL_SIZE) + GRID_OFFSET_X),
+		y = f32((snake.pos.y * CELL_SIZE) + GRID_OFFSET_Y),
+		width = CELL_SIZE,
+		height = CELL_SIZE,
 	}
 }
 
-grid_to_screen :: proc(gPos: Snake) -> rl.Rectangle {
-	gPos := get_screen_pos(gPos)
-	return rl.Rectangle{x = f32(gPos.x), y = f32(gPos.y), width = CELL_SIZE, height = CELL_SIZE}
-}
-
-draw_snake_pos :: proc(gPositions: [dynamic]Snake) {
-	for gPos, i in gPositions {
-		rect := grid_to_screen(gPos)
+draw_snake_pos :: proc(snakeParts: [dynamic]Snake) {
+	for snakePart, i in snakeParts {
+		rect := get_snake_rect(snakePart)
 		if i == 0 {
 			rl.DrawRectangleRec(rect, rl.RED)
 			continue
@@ -130,11 +123,10 @@ draw_snake_pos :: proc(gPositions: [dynamic]Snake) {
 	}
 }
 
-move_snake :: proc(snake: ^[dynamic]Snake, direction: Snake) {
+move_snake :: proc(snake: ^[dynamic]Snake, direction: [2]i32) {
 	head := snake[0]
 	newHead := Snake {
-		x = head.x + direction.x,
-		y = head.y + direction.y,
+		pos = {head.pos.x + direction.x, head.pos.y + direction.y},
 	}
 
 	for i := len(snake) - 1; i > 0; i -= 1 {
