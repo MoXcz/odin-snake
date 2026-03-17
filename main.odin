@@ -107,7 +107,7 @@ main :: proc() {
 		draw_snake_pos(snake)
 
 		if game_over {
-			rl.DrawText("Game Over", GRID_SIZE / 2, GRID_SIZE / 2, 32, rl.RED)
+			rl.DrawText("Game Over", 2, 2, 32, rl.RED)
 		}
 
 		rl.EndMode2D()
