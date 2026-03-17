@@ -38,7 +38,7 @@ get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 }
 
 main :: proc() {
-	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Monkey")
+	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Snake")
 	rl.SetExitKey(.Q)
 
 	rl.SetTargetFPS(60)
