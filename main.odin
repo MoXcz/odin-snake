@@ -5,16 +5,13 @@ import rl "vendor:raylib"
 // 12x12 grid; 50px
 // 50 * 12 = 600
 
-NUM_CELLS :: 12
-CELL_SIZE :: 50
+NUM_CELLS :: 20
+CELL_SIZE :: 25
 GRID_SIZE :: NUM_CELLS * CELL_SIZE
 TOTAL_SIZE :: GRID_SIZE / CELL_SIZE
 
-WIN_WIDTH :: 1280
-WIN_HEIGHT :: 720
-
-GRID_OFFSET_X :: (WIN_WIDTH - GRID_SIZE) / 2
-GRID_OFFSET_Y :: (WIN_HEIGHT - GRID_SIZE) / 2
+WIN_WIDTH :: 1000
+WIN_HEIGHT :: 1000
 
 Direction :: enum {
 	LEFT,
@@ -22,6 +19,8 @@ Direction :: enum {
 	RIGHT,
 	DOWN,
 }
+
+game_over: bool
 
 get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 	switch direction {
@@ -44,6 +43,7 @@ start :: proc(snake: ^[dynamic]Snake) {
 	append(snake, Snake{start_pos})
 	append(snake, Snake{start_pos - {1, 0}})
 	append(snake, Snake{start_pos - {2, 0}})
+	game_over = false
 }
 
 main :: proc() {
@@ -53,8 +53,8 @@ main :: proc() {
 	rl.SetTargetFPS(60)
 
 	direction := Direction.LEFT
-	moveInterval: f32 = 0.1
-	moveTimer: f32
+	move_interval: f32 = 0.1
+	move_timer: f32
 
 	snake := make([dynamic]Snake, 0, 20)
 	defer delete(snake)
@@ -63,13 +63,28 @@ main :: proc() {
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
-		rect := rl.Rectangle {
-			x      = f32(GRID_OFFSET_X),
-			y      = f32(GRID_OFFSET_Y),
-			width  = GRID_SIZE,
-			height = GRID_SIZE,
+
+		camera := rl.Camera2D {
+			zoom = f32(WIN_HEIGHT) / GRID_SIZE,
 		}
-		rl.DrawRectangleLines(GRID_OFFSET_X, GRID_OFFSET_Y, GRID_SIZE, GRID_SIZE, rl.BLACK)
+
+		if move_timer >= move_interval {
+			move_snake(&snake, get_direction_pos(direction))
+
+			head := snake[0]
+			if head.pos.x < 0 ||
+			   head.pos.y < 0 ||
+			   head.pos.x >= NUM_CELLS ||
+			   head.pos.y >= NUM_CELLS {
+				game_over = true
+				direction = .LEFT
+			}
+			move_timer = 0
+		}
+
+		rl.BeginMode2D(camera)
+
+		rl.DrawRectangleLines(0, 0, GRID_SIZE, GRID_SIZE, rl.BLACK)
 
 		// left
 		if rl.IsKeyPressed(.H) && direction != .RIGHT {
@@ -87,17 +102,17 @@ main :: proc() {
 		if rl.IsKeyPressed(.L) && direction != .LEFT {
 			direction = .RIGHT
 		}
-
-		moveTimer += rl.GetFrameTime()
-		if moveTimer >= moveInterval {
-			move_snake(&snake, get_direction_pos(direction))
-			draw_snake_pos(snake)
-			moveTimer = 0
+		if game_over {
+			if rl.IsKeyPressed(.ENTER) {
+				start(&snake)
+			}
 		} else {
-			draw_snake_pos(snake)
+			move_timer += rl.GetFrameTime()
 		}
 
+		draw_snake_pos(snake)
 
+		rl.EndMode2D()
 		rl.EndDrawing()
 	}
 
@@ -110,9 +125,9 @@ Snake :: struct {
 }
 
 get_snake_rect :: proc(snake: Snake) -> rl.Rectangle {
-	return rl.Rectangle {
-		x = f32((snake.pos.x * CELL_SIZE) + GRID_OFFSET_X),
-		y = f32((snake.pos.y * CELL_SIZE) + GRID_OFFSET_Y),
+	return {
+		x = f32(snake.pos.x * CELL_SIZE),
+		y = f32(snake.pos.y * CELL_SIZE),
 		width = CELL_SIZE,
 		height = CELL_SIZE,
 	}
