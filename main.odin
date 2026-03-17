@@ -5,8 +5,9 @@ import rl "vendor:raylib"
 // 12x12 grid; 50px
 // 50 * 12 = 600
 
-GRID_SIZE :: 600
+NUM_CELLS :: 12
 CELL_SIZE :: 50
+GRID_SIZE :: NUM_CELLS * CELL_SIZE
 TOTAL_SIZE :: GRID_SIZE / CELL_SIZE
 
 WIN_WIDTH :: 1280
@@ -96,10 +97,8 @@ main :: proc() {
 	rl.CloseWindow()
 }
 
-// gridPos represents the top-left position in a grid:
-// P .
-// . .
 Snake :: struct {
+	// pos represents the top-left position in a grid
 	pos: [2]i32,
 }
 
