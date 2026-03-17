@@ -37,6 +37,15 @@ get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 	return {1, 0}
 }
 
+start :: proc(snake: ^[dynamic]Snake) {
+	clear(snake)
+	start_pos := [2]i32{NUM_CELLS / 2, NUM_CELLS / 2}
+
+	append(snake, Snake{start_pos})
+	append(snake, Snake{start_pos - {1, 0}})
+	append(snake, Snake{start_pos - {2, 0}})
+}
+
 main :: proc() {
 	rl.InitWindow(WIN_WIDTH, WIN_HEIGHT, "Odin Snake")
 	rl.SetExitKey(.Q)
@@ -49,9 +58,7 @@ main :: proc() {
 
 	snake := make([dynamic]Snake, 0, 20)
 	defer delete(snake)
-	append(&snake, Snake{pos = {3, 4}})
-	append(&snake, Snake{pos = {2, 4}})
-	append(&snake, Snake{pos = {1, 4}})
+	start(&snake)
 
 	for (!rl.WindowShouldClose()) {
 		rl.BeginDrawing()
