@@ -16,8 +16,6 @@ Direction :: enum {
 	DOWN,
 }
 
-game_over: bool
-
 get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 	switch direction {
 	case .LEFT:
@@ -33,8 +31,8 @@ get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 }
 
 Game :: struct {
-	snake:     Snake,
-	game_over: bool,
+	snake:   Snake,
+	is_over: bool,
 }
 
 game_init :: proc() -> Game {
@@ -45,7 +43,7 @@ game_init :: proc() -> Game {
 	game.snake.body[0] = start_pos - {1, 0}
 	game.snake.body[1] = start_pos - {2, 0}
 	game.snake.direction = .LEFT
-	game.game_over = false
+	game.is_over = false
 
 	return game
 }
@@ -74,7 +72,7 @@ main :: proc() {
 		if rl.IsKeyPressed(.L) && game.snake.direction != .LEFT {
 			game.snake.direction = .RIGHT
 		}
-		if game_over {
+		if game.is_over {
 			if rl.IsKeyPressed(.ENTER) {
 				game = game_init()
 			}
@@ -87,7 +85,7 @@ main :: proc() {
 
 			head := game.snake.head
 			if head.x < 0 || head.y < 0 || head.x >= NUM_CELLS || head.y >= NUM_CELLS {
-				game_over = true
+				game.is_over = true
 				game.snake.direction = .LEFT
 			}
 			move_timer = 0
@@ -104,7 +102,7 @@ main :: proc() {
 		rl.DrawRectangleLines(0, 0, GRID_SIZE, GRID_SIZE, rl.BLACK)
 		draw_snake_pos(game.snake)
 
-		if game_over {
+		if game.is_over {
 			rl.DrawText("Game Over", 2, 2, 32, rl.RED)
 		}
 
