@@ -42,6 +42,7 @@ game_init :: proc() -> Game {
 	game.snake.head = start_pos
 	game.snake.body[0] = start_pos - {1, 0}
 	game.snake.body[1] = start_pos - {2, 0}
+	game.snake.snake_length = 2
 	game.snake.direction = .LEFT
 	game.is_over = false
 
@@ -114,9 +115,10 @@ main :: proc() {
 }
 
 Snake :: struct {
-	head:      [2]i32,
-	body:      [10][2]i32,
-	direction: Direction,
+	head:         [2]i32,
+	snake_length: i32,
+	body:         [10][2]i32,
+	direction:    Direction,
 }
 
 get_snake_rect :: proc(body_part: [2]i32) -> rl.Rectangle {
@@ -130,19 +132,16 @@ get_snake_rect :: proc(body_part: [2]i32) -> rl.Rectangle {
 
 draw_snake_pos :: proc(snake: Snake) {
 	rl.DrawRectangleRec(get_snake_rect(snake.head), rl.RED)
-	for snakePart, i in snake.body {
-		rect := get_snake_rect(snakePart)
+	for i in 0 ..< snake.snake_length {
+		rect := get_snake_rect(snake.body[i])
 		rl.DrawRectangleRec(rect, rl.GREEN)
 	}
 }
 
 move_snake :: proc(snake: ^Snake) {
-	head := snake.head
-	directionPos := get_direction_pos(snake.direction)
-	newHead := [2]i32{head.x + directionPos.x, head.y + directionPos.y}
-
-	for i := len(snake.body) - 1; i > 0; i -= 1 {
+	for i := snake.snake_length - 1; i > 0; i -= 1 {
 		snake.body[i] = snake.body[i - 1]
 	}
-	snake.head = newHead
+	snake.body[0] = snake.head
+	snake.head += get_direction_pos(snake.direction)
 }
