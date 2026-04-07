@@ -32,14 +32,21 @@ get_direction_pos :: proc(direction: Direction) -> [2]i32 {
 	return {1, 0}
 }
 
-start :: proc(snake: ^[dynamic]Snake) {
-	clear(snake)
+Game :: struct {
+	snake:     Snake,
+	game_over: bool,
+}
+
+game_init :: proc() -> Game {
+	game: Game
 	start_pos := [2]i32{NUM_CELLS / 2, NUM_CELLS / 2}
 
-	append(snake, Snake{start_pos})
-	append(snake, Snake{start_pos - {1, 0}})
-	append(snake, Snake{start_pos - {2, 0}})
-	game_over = false
+	game.snake.head = start_pos
+	game.snake.body[0] = start_pos - {1, 0}
+	game.snake.body[1] = start_pos - {2, 0}
+	game.game_over = false
+
+	return game
 }
 
 main :: proc() {
@@ -52,9 +59,7 @@ main :: proc() {
 	move_interval: f32 = 0.1
 	move_timer: f32
 
-	snake := make([dynamic]Snake, 0, 20)
-	defer delete(snake)
-	start(&snake)
+	game := game_init()
 
 	for (!rl.WindowShouldClose()) {
 		if rl.IsKeyPressed(.H) && direction != .RIGHT {
@@ -71,20 +76,17 @@ main :: proc() {
 		}
 		if game_over {
 			if rl.IsKeyPressed(.ENTER) {
-				start(&snake)
+				game = game_init()
 			}
 		} else {
 			move_timer += rl.GetFrameTime()
 		}
 
 		if move_timer >= move_interval {
-			move_snake(&snake, get_direction_pos(direction))
+			move_snake(&game.snake, get_direction_pos(direction))
 
-			head := snake[0]
-			if head.pos.x < 0 ||
-			   head.pos.y < 0 ||
-			   head.pos.x >= NUM_CELLS ||
-			   head.pos.y >= NUM_CELLS {
+			head := game.snake.head
+			if head.x < 0 || head.y < 0 || head.x >= NUM_CELLS || head.y >= NUM_CELLS {
 				game_over = true
 				direction = .LEFT
 			}
@@ -100,7 +102,7 @@ main :: proc() {
 		rl.BeginMode2D(camera)
 
 		rl.DrawRectangleLines(0, 0, GRID_SIZE, GRID_SIZE, rl.BLACK)
-		draw_snake_pos(snake)
+		draw_snake_pos(game.snake)
 
 		if game_over {
 			rl.DrawText("Game Over", 2, 2, 32, rl.RED)
@@ -114,21 +116,21 @@ main :: proc() {
 }
 
 Snake :: struct {
-	// pos represents the top-left position in a grid
-	pos: [2]i32,
+	head: [2]i32,
+	body: [10][2]i32,
 }
 
-get_snake_rect :: proc(snake: Snake) -> rl.Rectangle {
+get_snake_rect :: proc(body_part: [2]i32) -> rl.Rectangle {
 	return {
-		x = f32(snake.pos.x * CELL_SIZE),
-		y = f32(snake.pos.y * CELL_SIZE),
+		x = f32(body_part.x * CELL_SIZE),
+		y = f32(body_part.y * CELL_SIZE),
 		width = CELL_SIZE,
 		height = CELL_SIZE,
 	}
 }
 
-draw_snake_pos :: proc(snakeParts: [dynamic]Snake) {
-	for snakePart, i in snakeParts {
+draw_snake_pos :: proc(snakeParts: Snake) {
+	for snakePart, i in snakeParts.body {
 		rect := get_snake_rect(snakePart)
 		if i == 0 {
 			rl.DrawRectangleRec(rect, rl.RED)
@@ -138,14 +140,12 @@ draw_snake_pos :: proc(snakeParts: [dynamic]Snake) {
 	}
 }
 
-move_snake :: proc(snake: ^[dynamic]Snake, direction: [2]i32) {
-	head := snake[0]
-	newHead := Snake {
-		pos = {head.pos.x + direction.x, head.pos.y + direction.y},
-	}
+move_snake :: proc(snake: ^Snake, direction: [2]i32) {
+	head := snake.head
+	newHead := [2]i32{head.x + direction.x, head.y + direction.y}
 
-	for i := len(snake) - 1; i > 0; i -= 1 {
-		snake[i] = snake[i - 1]
+	for i := len(snake.body) - 1; i > 0; i -= 1 {
+		snake.body[i] = snake.body[i - 1]
 	}
-	snake[0] = newHead
+	snake.head = newHead
 }
