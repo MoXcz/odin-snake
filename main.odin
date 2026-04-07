@@ -44,6 +44,7 @@ game_init :: proc() -> Game {
 	game.snake.head = start_pos
 	game.snake.body[0] = start_pos - {1, 0}
 	game.snake.body[1] = start_pos - {2, 0}
+	game.snake.direction = .LEFT
 	game.game_over = false
 
 	return game
@@ -55,24 +56,23 @@ main :: proc() {
 
 	rl.SetTargetFPS(60)
 
-	direction := Direction.LEFT
 	move_interval: f32 = 0.1
 	move_timer: f32
 
 	game := game_init()
 
 	for (!rl.WindowShouldClose()) {
-		if rl.IsKeyPressed(.H) && direction != .RIGHT {
-			direction = .LEFT
+		if rl.IsKeyPressed(.H) && game.snake.direction != .RIGHT {
+			game.snake.direction = .LEFT
 		}
-		if rl.IsKeyPressed(.J) && direction != .UP {
-			direction = .DOWN
+		if rl.IsKeyPressed(.J) && game.snake.direction != .UP {
+			game.snake.direction = .DOWN
 		}
-		if rl.IsKeyPressed(.K) && direction != .DOWN {
-			direction = .UP
+		if rl.IsKeyPressed(.K) && game.snake.direction != .DOWN {
+			game.snake.direction = .UP
 		}
-		if rl.IsKeyPressed(.L) && direction != .LEFT {
-			direction = .RIGHT
+		if rl.IsKeyPressed(.L) && game.snake.direction != .LEFT {
+			game.snake.direction = .RIGHT
 		}
 		if game_over {
 			if rl.IsKeyPressed(.ENTER) {
@@ -83,12 +83,12 @@ main :: proc() {
 		}
 
 		if move_timer >= move_interval {
-			move_snake(&game.snake, get_direction_pos(direction))
+			move_snake(&game.snake)
 
 			head := game.snake.head
 			if head.x < 0 || head.y < 0 || head.x >= NUM_CELLS || head.y >= NUM_CELLS {
 				game_over = true
-				direction = .LEFT
+				game.snake.direction = .LEFT
 			}
 			move_timer = 0
 		}
@@ -116,8 +116,9 @@ main :: proc() {
 }
 
 Snake :: struct {
-	head: [2]i32,
-	body: [10][2]i32,
+	head:      [2]i32,
+	body:      [10][2]i32,
+	direction: Direction,
 }
 
 get_snake_rect :: proc(body_part: [2]i32) -> rl.Rectangle {
@@ -129,20 +130,18 @@ get_snake_rect :: proc(body_part: [2]i32) -> rl.Rectangle {
 	}
 }
 
-draw_snake_pos :: proc(snakeParts: Snake) {
-	for snakePart, i in snakeParts.body {
+draw_snake_pos :: proc(snake: Snake) {
+	rl.DrawRectangleRec(get_snake_rect(snake.head), rl.RED)
+	for snakePart, i in snake.body {
 		rect := get_snake_rect(snakePart)
-		if i == 0 {
-			rl.DrawRectangleRec(rect, rl.RED)
-			continue
-		}
 		rl.DrawRectangleRec(rect, rl.GREEN)
 	}
 }
 
-move_snake :: proc(snake: ^Snake, direction: [2]i32) {
+move_snake :: proc(snake: ^Snake) {
 	head := snake.head
-	newHead := [2]i32{head.x + direction.x, head.y + direction.y}
+	directionPos := get_direction_pos(snake.direction)
+	newHead := [2]i32{head.x + directionPos.x, head.y + directionPos.y}
 
 	for i := len(snake.body) - 1; i > 0; i -= 1 {
 		snake.body[i] = snake.body[i - 1]
